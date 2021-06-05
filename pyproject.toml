@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "fastapi-sse"
+version = "0.1.0"
+description = ""
+authors = ["Jan Vlcinsky <jan.vlcinsky@tamtamresearch.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+fastapi = "^0.65.1"
+uvicorn = "^0.14.0"
+sse-starlette = "^0.7.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
