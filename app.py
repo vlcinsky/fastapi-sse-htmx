@@ -1,5 +1,4 @@
 import asyncio
-from itertools import count
 import logging
 import random
 
@@ -12,22 +11,24 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
+COUNTER = {"#of_news": 0, "#of_subscribers": 0}
+
+
 async def event_generator(request):
-    """Generate status events with current # of users or news
-    """
-    for i in count():
+    """Generate status events with current # of users or news"""
+    while True:
         if await request.is_disconnected():
             logger.debug("Request disconnected")
             break
         event = random.choice(["#of_news", "#of_subscribers"])
-        status = f"{i}"
+        COUNTER[event] += 1
         yield {
             "event": event,
-            "retry": 30000,  # miliseconds
-            "data": status,  # HTML representation
+            "retry": 5000,  # miliseconds
+            "data": str(COUNTER[event]),  # HTML representation
         }
-        logger.debug(f"{event}: {status}")
-        await asyncio.sleep(2)  # in seconds
+        logger.debug(f"{event}: {COUNTER[event]}")
+        await asyncio.sleep(0.3)  # in seconds
 
 
 app = FastAPI()
@@ -35,7 +36,8 @@ app = FastAPI()
 
 @app.get("/")
 async def home():
-    return HTMLResponse("""
+    return HTMLResponse(
+        """
 <html>
   <head>
     <script src="https://unpkg.com/htmx.org@1.4.1"></script>
@@ -45,7 +47,7 @@ async def home():
     <table>
       <tr>
         <td>News</td>
-        <td hx-sse="swap:#of_news">?</td>
+        <td hx-sse="swap:#of_news">0</td>
       </tr>
       <tr>
         <td>Operating</td>
@@ -53,12 +55,13 @@ async def home():
       </tr>
       <tr>
         <td>Subscribers</td>
-        <td hx-sse="swap:#of_subscribers">??</td>
+        <td hx-sse="swap:#of_subscribers">0</td>
       </tr>
     </table>
   </body>
 </html>
-""")
+"""
+    )
 
 
 @app.get("/status_updates")
